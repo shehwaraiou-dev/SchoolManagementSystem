@@ -308,6 +308,55 @@
   .toast.show{transform:none;opacity:1}
   .toast svg{width:20px;height:20px;color:#7cd2a0}
 
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:150;background:rgba(7,42,29,.5);backdrop-filter:blur(4px);
+    display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;
+    opacity:0;visibility:hidden;transition:.25s;
+  }
+  .modal-overlay.show{opacity:1;visibility:visible}
+  .modal{
+    background:var(--surface);border-radius:20px;width:100%;max-width:560px;box-shadow:var(--shadow-lg);
+    transform:translateY(24px) scale(.98);transition:.3s cubic-bezier(.2,.8,.2,1);overflow:hidden;
+  }
+  .modal-overlay.show .modal{transform:none}
+  .modal-head{
+    display:flex;align-items:center;gap:14px;padding:22px 24px;border-bottom:1px solid var(--line);
+    background:linear-gradient(100deg,var(--surface-2),var(--surface));
+  }
+  .modal-head .mi{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#fff;flex:none;background:linear-gradient(140deg,var(--primary),var(--primary-light))}
+  .modal-head .mi svg{width:21px;height:21px}
+  .modal-head h3{font-family:var(--font-d);font-size:20px;letter-spacing:-.3px}
+  .modal-head p{font-size:13px;color:var(--muted);margin-top:1px}
+  .modal-head .close{margin-left:auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--muted);transition:.15s}
+  .modal-head .close:hover{border-color:var(--danger);color:var(--danger)}
+  .modal-head .close svg{width:18px;height:18px}
+  .modal-body{padding:24px;max-height:62vh;overflow-y:auto}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field.full{grid-column:1/-1}
+  .field label{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .field label .req{color:var(--danger)}
+  .field input,.field select,.field textarea{
+    font-family:var(--font-b);font-size:14px;color:var(--ink);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:11px;padding:11px 13px;outline:0;transition:.15s;width:100%;
+  }
+  .field textarea{resize:vertical;min-height:86px}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary-light);background:#fff;box-shadow:0 0 0 4px var(--primary-glow)}
+  .field .err{font-size:11.5px;color:var(--danger);display:none}
+  .field.invalid input,.field.invalid select{border-color:var(--danger);background:var(--danger-soft)}
+  .field.invalid .err{display:block}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line);background:var(--surface-2)}
+  .detail-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .detail-row:last-child{border-bottom:0}
+  .detail-row span{color:var(--muted)}
+  .detail-row b{font-family:var(--font-d);font-weight:600}
+  .detail-hero{display:flex;align-items:center;gap:15px;margin-bottom:8px}
+  .detail-hero .avatar{width:58px;height:58px;font-size:20px;border-radius:16px}
+  .detail-hero b{font-family:var(--font-d);font-size:19px;display:block}
+  .detail-hero small{color:var(--muted);font-size:13px}
+  @media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+
   .empty{text-align:center;padding:50px 20px;color:var(--muted)}
   .empty svg{width:40px;height:40px;opacity:.4;margin-bottom:10px}
 
@@ -357,7 +406,7 @@
     <div class="nav-label">Academics</div>
     <div class="nav-item" data-view="students">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-      Students <span class="badge">1,284</span>
+      Students <span class="badge" id="navStuBadge">1,284</span>
     </div>
     <div class="nav-item" data-view="teachers">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -441,7 +490,7 @@
           </div>
           <div style="display:flex;gap:10px">
             <button class="btn btn-ghost" onclick="toast('Report exported as PDF')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>Export</button>
-            <button class="btn btn-primary" onclick="toast('New admission form opened')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New Admission</button>
+            <button class="btn btn-primary" onclick="openStudentForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New Admission</button>
           </div>
         </div>
 
@@ -449,7 +498,7 @@
           <div class="stat" style="--ic-bg:var(--primary-glow)">
             <div class="ic" style="background:linear-gradient(140deg,var(--primary),var(--primary-light))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
             <div class="label">Total Students</div>
-            <div class="num">1,284</div>
+            <div class="num" id="statStudents">1,284</div>
             <span class="trend up">▲ 6.2% <small style="font-weight:500;color:inherit">this term</small></span>
           </div>
           <div class="stat" style="--ic-bg:var(--accent-soft)">
@@ -528,6 +577,7 @@
 
           <div class="panel">
             <div class="panel-head"><div><h3>Notice Board</h3></div><span class="chip" onclick="go('notices')">Manage</span></div>
+            <div id="noticeListDash">
             <div class="notice red">
               <div class="nh"><strong>Parent-Teacher Meeting</strong><span class="tag r">Urgent</span></div>
               <p>PTM for Classes 6–10 on Saturday, 7 June at 9:00 AM in the main auditorium.</p>
@@ -543,6 +593,7 @@
               <p>Last date for May fee challan is 10 June. Late fee of Rs 200/day applies after.</p>
               <div class="meta">Posted by Accounts · 5 days ago</div>
             </div>
+            </div>
           </div>
         </div>
       </section>
@@ -551,7 +602,7 @@
       <section class="view" id="students">
         <div class="page-head">
           <div><div class="eyebrow">Academics</div><h2>Students Directory</h2><p>Manage admissions, profiles and class allocation for all enrolled students.</p></div>
-          <button class="btn btn-primary" onclick="toast('Admission form opened')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add Student</button>
+          <button class="btn btn-primary" onclick="openStudentForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add Student</button>
         </div>
         <div class="panel">
           <div class="table-tools">
@@ -574,7 +625,7 @@
       <section class="view" id="teachers">
         <div class="page-head">
           <div><div class="eyebrow">Academics</div><h2>Teaching Staff</h2><p>Faculty members across all departments, with assigned classes and subjects.</p></div>
-          <button class="btn btn-primary" onclick="toast('Add teacher form opened')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add Teacher</button>
+          <button class="btn btn-primary" onclick="openTeacherForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add Teacher</button>
         </div>
         <div class="panel">
           <div class="table-tools">
@@ -655,7 +706,7 @@
       <section class="view" id="fees">
         <div class="page-head">
           <div><div class="eyebrow">Administration</div><h2>Fee Management</h2><p>Track challans, collections and outstanding dues across the school.</p></div>
-          <button class="btn btn-primary" onclick="toast('Bulk challans generated for June')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Generate Challans</button>
+          <button class="btn btn-primary" onclick="confirmAction('Generate Fee Challans','This will generate June fee challans for all 1,284 enrolled students. Continue?','Generate',()=>toast('1,284 challans generated for June 2026'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Generate Challans</button>
         </div>
         <div class="stat-grid">
           <div class="stat" style="--ic-bg:#e0f3e9"><div class="ic" style="background:linear-gradient(140deg,var(--primary),var(--primary-light))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="label">Collected (May)</div><div class="num">Rs 38.4L</div><span class="trend up">86% of target</span></div>
@@ -691,10 +742,10 @@
       <section class="view" id="notices">
         <div class="page-head">
           <div><div class="eyebrow">Administration</div><h2>Notice Board</h2><p>Broadcast announcements to students, parents and staff.</p></div>
-          <button class="btn btn-primary" onclick="toast('Compose notice opened')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New Notice</button>
+          <button class="btn btn-primary" onclick="openNoticeForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New Notice</button>
         </div>
         <div class="grid-2b">
-          <div class="panel">
+          <div class="panel" id="noticeListMain">
             <div class="notice red"><div class="nh"><strong>Parent-Teacher Meeting</strong><span class="tag r">Urgent</span></div><p>PTM for Classes 6–10 on Saturday, 7 June at 9:00 AM in the main auditorium. Attendance of at least one guardian is mandatory.</p><div class="meta">Audience: Parents · 482 views</div></div>
             <div class="notice green"><div class="nh"><strong>Eid-ul-Adha Holidays</strong><span class="tag g">Holiday</span></div><p>School will remain closed from 16 June to 21 June. Classes resume on Monday, 23 June 2026 Insha'Allah. Eid Mubarak to all families!</p><div class="meta">Audience: Everyone · 1.2k views</div></div>
             <div class="notice"><div class="nh"><strong>Annual Sports Gala 2026</strong><span class="tag">Event</span></div><p>The Annual Sports Gala will be held on 14 June at the school ground. Students may register for events with their class teachers.</p><div class="meta">Audience: Students · 760 views</div></div>
@@ -708,6 +759,18 @@
       </section>
 
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal" role="dialog">
+    <div class="modal-head">
+      <div class="mi" id="modalIcon"></div>
+      <div><h3 id="modalTitle"></h3><p id="modalSub"></p></div>
+      <button class="close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
   </div>
 </div>
 
@@ -791,8 +854,9 @@ function renderStudents(list){
       <td><span class="pill ${fc}">${ft}</span></td>
       <td><b>${att}</b></td>
       <td><div class="row-act">
-        <button title="View" onclick="toast('Opened ${name}\\'s profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        <button title="Edit" onclick="toast('Editing ${name}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+        <button title="View" onclick="viewStudent('${roll}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button title="Edit" onclick="openStudentForm('${roll}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+        <button title="Delete" onclick="deleteStudent('${roll}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
       </div></td>
     </tr>`;
   }).join("") : `<tr><td colspan="7"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><div>No students match your search.</div></div></td></tr>`;
@@ -808,7 +872,11 @@ function renderTeachers(list){
       <td>${cls}</td>
       <td>${exp}</td>
       <td><span class="pill ${sc}">${stx}</span></td>
-      <td><div class="row-act"><button onclick="toast('Opened ${name}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td>
+      <td><div class="row-act">
+        <button title="View" onclick="viewTeacher('${name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button title="Edit" onclick="openTeacherForm('${name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+        <button title="Delete" onclick="deleteTeacher('${name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+      </div></td>
     </tr>`;
   }).join("");
 }
@@ -936,6 +1004,218 @@ function toast(msg){
   clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2600);
 }
 
+/* ---------------- MODAL ENGINE ---------------- */
+const PALETTE=["c1","c2","c3","c4","c5","c6"];
+let colorTick=Math.floor(Math.random()*6);
+function nextColor(){return PALETTE[(colorTick++)%PALETTE.length]}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+const ICONS={
+  add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  notice:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+};
+function openModal({icon,title,sub,body,footer,iconBg}){
+  $("#modalIcon").innerHTML=ICONS[icon]||ICONS.add;
+  $("#modalIcon").style.background=iconBg||"linear-gradient(140deg,var(--primary),var(--primary-light))";
+  $("#modalTitle").textContent=title;
+  $("#modalSub").textContent=sub||"";
+  $("#modalBody").innerHTML=body;
+  $("#modalFoot").innerHTML=footer;
+  $("#modal").classList.add("show");
+}
+function closeModal(){$("#modal").classList.remove("show")}
+$("#modal").addEventListener("mousedown",e=>{if(e.target.id==="modal")closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+
+function field(id,label,{type="text",value="",options,required,placeholder,full}={}){
+  let input;
+  if(type==="select"){
+    input=`<select id="${id}">`+options.map(o=>`<option ${o===value?"selected":""}>${esc(o)}</option>`).join("")+`</select>`;
+  }else if(type==="textarea"){
+    input=`<textarea id="${id}" placeholder="${placeholder||""}">${esc(value)}</textarea>`;
+  }else{
+    input=`<input id="${id}" type="${type}" value="${esc(value)}" placeholder="${placeholder||""}">`;
+  }
+  return `<div class="field ${full?"full":""}" data-f="${id}" ${required?'data-req="1"':''}>
+    <label>${label}${required?' <span class="req">*</span>':''}</label>${input}
+    <span class="err">This field is required.</span></div>`;
+}
+function readForm(ids){
+  let ok=true,data={};
+  ids.forEach(id=>{
+    const wrap=document.querySelector(`[data-f="${id}"]`);
+    const el=$("#"+id);const val=el.value.trim();
+    if(wrap.dataset.req&&!val){wrap.classList.add("invalid");ok=false;}
+    else wrap.classList.remove("invalid");
+    data[id]=val;
+  });
+  return ok?data:null;
+}
+
+/* ---------------- STUDENT CRUD ---------------- */
+const CLASSES=["Nursery","Prep","Class 1","Class 2","Class 3","Class 4","Class 5","Class 6","Class 7","Class 8","Class 9","Class 10"];
+function nextRoll(){return "2026-"+String(900+students.length+Math.floor(Math.random()*90)).padStart(4,"0")}
+function openStudentForm(roll){
+  const editing=roll?students.find(s=>s[1]===roll):null;
+  const d=editing||["", nextRoll(),"Class 9","Section A","","due","90%",nextColor()];
+  openModal({
+    icon:editing?"edit":"add",iconBg:"linear-gradient(140deg,#0c5c3d,#13855b)",
+    title:editing?"Edit Student":"Add New Student",
+    sub:editing?"Update student record":"Enrol a new student into the school",
+    body:`<div class="form-grid">
+      ${field("s_name","Full Name",{value:d[0],required:true,placeholder:"e.g. Ahmed Khan",full:true})}
+      ${field("s_roll","Roll No",{value:d[1],required:true})}
+      ${field("s_class","Class",{type:"select",value:d[2],options:CLASSES})}
+      ${field("s_sec","Section",{type:"select",value:d[3],options:["Section A","Section B","Section C"]})}
+      ${field("s_guard","Guardian Name",{value:d[4],required:true,placeholder:"e.g. Imran Khan"})}
+      ${field("s_fee","Fee Status",{type:"select",value:({paid:"Paid",due:"Due",partial:"Partial"})[d[5]],options:["Paid","Due","Partial"]})}
+      ${field("s_att","Attendance %",{value:d[6],placeholder:"e.g. 95%"})}
+    </div>`,
+    footer:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent('${roll||""}','${d[7]}')">${editing?"Save Changes":"Add Student"}</button>`
+  });
+}
+function saveStudent(roll,clr){
+  const f=readForm(["s_name","s_roll","s_class","s_sec","s_guard","s_fee","s_att"]);
+  if(!f)return;
+  const feeKey={Paid:"paid",Due:"due",Partial:"partial"}[f.s_fee];
+  let att=f.s_att||"90%";if(att&&!att.includes("%"))att+="%";
+  const row=[f.s_name,f.s_roll,f.s_class,f.s_sec,f.s_guard,feeKey,att,clr];
+  if(roll){
+    const i=students.findIndex(s=>s[1]===roll);students[i]=row;toast("Student record updated");
+  }else{
+    students.unshift(row);toast(f.s_name+" admitted successfully");
+  }
+  filterStudents();refreshCounts();closeModal();
+}
+function viewStudent(roll){
+  const s=students.find(x=>x[1]===roll);if(!s)return;
+  const [name,r,cls,sec,guard,fee,att,clr]=s;const[,ft]=feeMap[fee];
+  openModal({
+    icon:"user",title:"Student Profile",sub:"Full record",
+    body:`<div class="detail-hero"><div class="avatar ${clr}">${initials(name)}</div>
+      <div><b>${esc(name)}</b><small>${cls} · ${sec}</small></div></div>
+      <div class="detail-row"><span>Roll Number</span><b>${esc(r)}</b></div>
+      <div class="detail-row"><span>Class & Section</span><b>${cls} — ${sec}</b></div>
+      <div class="detail-row"><span>Guardian</span><b>${esc(guard)}</b></div>
+      <div class="detail-row"><span>Fee Status</span><span class="pill ${feeMap[fee][0]}">${ft}</span></div>
+      <div class="detail-row"><span>Attendance</span><b>${att}</b></div>`,
+    footer:`<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="openStudentForm('${roll}')">Edit Record</button>`
+  });
+}
+function deleteStudent(roll){
+  const s=students.find(x=>x[1]===roll);if(!s)return;
+  confirmAction("Remove Student",`Are you sure you want to remove ${s[0]} (${roll})? This cannot be undone.`,"Remove",()=>{
+    const i=students.findIndex(x=>x[1]===roll);students.splice(i,1);
+    filterStudents();refreshCounts();toast("Student removed");
+  },true);
+}
+
+/* ---------------- TEACHER CRUD ---------------- */
+const DEPTS=["Science","Mathematics","Languages","English","Social Studies","Computer","Islamiat"];
+function openTeacherForm(name){
+  const editing=name?teachers.find(t=>t[0]===name):null;
+  const d=editing||["","Science","","","","active",nextColor()];
+  openModal({
+    icon:editing?"edit":"add",iconBg:"linear-gradient(140deg,#b5732a,#e0a23a)",
+    title:editing?"Edit Teacher":"Add New Teacher",
+    sub:editing?"Update faculty record":"Add a faculty member",
+    body:`<div class="form-grid">
+      ${field("t_name","Full Name",{value:d[0],required:true,placeholder:"e.g. Sir Ali / Miss Sana",full:true})}
+      ${field("t_dept","Department",{type:"select",value:d[1],options:DEPTS})}
+      ${field("t_status","Status",{type:"select",value:({active:"Active",leave:"On Leave"})[d[5]],options:["Active","On Leave"]})}
+      ${field("t_subj","Subjects",{value:d[2],required:true,placeholder:"e.g. Physics, Chemistry"})}
+      ${field("t_cls","Classes",{value:d[3],placeholder:"e.g. 9, 10"})}
+      ${field("t_exp","Experience",{value:d[4],placeholder:"e.g. 5 yrs",full:true})}
+    </div>`,
+    footer:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTeacher('${name?name.replace(/'/g,"\\'"):""}','${d[6]}')">${editing?"Save Changes":"Add Teacher"}</button>`
+  });
+}
+function saveTeacher(name,clr){
+  const f=readForm(["t_name","t_dept","t_status","t_subj","t_cls","t_exp"]);
+  if(!f)return;
+  const st={Active:"active","On Leave":"leave"}[f.t_status];
+  const row=[f.t_name,f.t_dept,f.t_subj,f.t_cls||"—",f.t_exp||"—",st,clr];
+  if(name){const i=teachers.findIndex(t=>t[0]===name);teachers[i]=row;toast("Teacher record updated");}
+  else{teachers.unshift(row);toast(f.t_name+" added to faculty");}
+  renderTeachers(teachers);closeModal();
+}
+function viewTeacher(name){
+  const t=teachers.find(x=>x[0]===name);if(!t)return;
+  const [n,dept,subj,cls,exp,st,clr]=t;const[,stx]=feeMap[st];
+  openModal({
+    icon:"user",iconBg:"linear-gradient(140deg,#b5732a,#e0a23a)",title:"Teacher Profile",sub:"Faculty record",
+    body:`<div class="detail-hero"><div class="avatar ${clr}">${initials(n)}</div>
+      <div><b>${esc(n)}</b><small>${esc(dept)} Department</small></div></div>
+      <div class="detail-row"><span>Subjects</span><b>${esc(subj)}</b></div>
+      <div class="detail-row"><span>Classes</span><b>${esc(cls)}</b></div>
+      <div class="detail-row"><span>Experience</span><b>${esc(exp)}</b></div>
+      <div class="detail-row"><span>Status</span><span class="pill ${feeMap[st][0]}">${stx}</span></div>`,
+    footer:`<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="openTeacherForm('${name.replace(/'/g,"\\'")}')">Edit Record</button>`
+  });
+}
+function deleteTeacher(name){
+  const t=teachers.find(x=>x[0]===name);if(!t)return;
+  confirmAction("Remove Teacher",`Remove ${name} from faculty?`,"Remove",()=>{
+    const i=teachers.findIndex(x=>x[0]===name);teachers.splice(i,1);
+    renderTeachers(teachers);toast("Teacher removed");
+  },true);
+}
+
+/* ---------------- NOTICE ---------------- */
+const TAGMAP={Urgent:["red","r"],Holiday:["green","g"],Activity:["green","g"],Event:["",""],Finance:["",""],Notice:["",""]};
+function openNoticeForm(){
+  openModal({
+    icon:"notice",title:"Publish Notice",sub:"Broadcast an announcement",
+    body:`<div class="form-grid">
+      ${field("n_title","Notice Title",{required:true,placeholder:"e.g. Summer Vacation Notice",full:true})}
+      ${field("n_tag","Category",{type:"select",options:["Notice","Urgent","Holiday","Event","Finance","Activity"]})}
+      ${field("n_aud","Audience",{type:"select",options:["Everyone","Parents","Students","Staff"]})}
+      ${field("n_body","Message",{type:"textarea",required:true,placeholder:"Write the announcement details…",full:true})}
+    </div>`,
+    footer:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNotice()">Publish Notice</button>`
+  });
+}
+function saveNotice(){
+  const f=readForm(["n_title","n_tag","n_aud","n_body"]);if(!f)return;
+  const [cls,tg]=TAGMAP[f.n_tag];
+  const html=`<div class="notice ${cls}"><div class="nh"><strong>${esc(f.n_title)}</strong><span class="tag ${tg}">${f.n_tag}</span></div>
+    <p>${esc(f.n_body)}</p><div class="meta">Audience: ${f.n_aud} · just now</div></div>`;
+  const main=$("#noticeListMain");if(main)main.insertAdjacentHTML("afterbegin",html);
+  const dash=$("#noticeListDash");
+  if(dash)dash.insertAdjacentHTML("afterbegin",`<div class="notice ${cls}"><div class="nh"><strong>${esc(f.n_title)}</strong><span class="tag ${tg}">${f.n_tag}</span></div><p>${esc(f.n_body)}</p><div class="meta">Posted by Admin · just now</div></div>`);
+  closeModal();toast("Notice published");
+}
+
+/* ---------------- CONFIRM ---------------- */
+let confirmCB=null;
+function confirmAction(title,msg,label,cb,danger){
+  confirmCB=cb;
+  openModal({
+    icon:"warn",iconBg:danger?"linear-gradient(140deg,#9a4434,#d2553f)":"linear-gradient(140deg,#b5732a,#e0a23a)",
+    title,sub:"Please confirm",
+    body:`<p style="font-size:14.5px;line-height:1.6;color:var(--ink)">${esc(msg)}</p>`,
+    footer:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="${danger?'background:var(--danger);box-shadow:0 10px 20px -10px rgba(210,85,63,.7)':''}" onclick="runConfirm()">${label}</button>`
+  });
+}
+function runConfirm(){closeModal();if(confirmCB)confirmCB();confirmCB=null;}
+
+/* ---------------- COUNTS ---------------- */
+const BASE_STUDENTS=1272;
+function refreshCounts(){
+  const total=BASE_STUDENTS+students.length;
+  const fmt=total.toLocaleString("en-US");
+  $("#statStudents").textContent=fmt;
+  $("#navStuBadge").textContent=fmt;
+}
+
 /* ---------------- INIT ---------------- */
 renderStudents(students);
 renderTeachers(teachers);
@@ -945,6 +1225,7 @@ renderAttendance();
 renderTimetable();
 renderFeeBars();
 renderExamBars();
+refreshCounts();
 setTimeout(()=>animateBars($("#feeBars")),300);
 </script>
 </body>
